@@ -1,18 +1,17 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
+from django.shortcuts import render, get_object_or_404, redirect
 
+# Create your views here.
 from stock.models import Stock, AccountCurrency, AccountStock
 from stock.forms import BuySellForm
+from django.core.cache import cache
 
-def stock_list(request):
-    stocks = Stock.objects.all()
-    context = {
-        'stocks': stocks,
-    }
+def stock_list(request): 
+    stocks = Stock.objects.all() 
+    context = { 'stocks': stocks, }
     return render(request, 'stocks.html', context)
 
-@login_required
+
 def stock_detail(request, pk):
     stock = get_object_or_404(Stock, pk=pk)
     context = {
@@ -21,7 +20,7 @@ def stock_detail(request, pk):
     }
     return render(request, 'stock.html', context)
 
-@login_required
+
 def stock_buy(request, pk):
     if request.method != "POST":
         return redirect('stock:detail', pk=pk)
@@ -34,7 +33,8 @@ def stock_buy(request, pk):
         price = form.cleaned_data['price']
         buy_cost = price * amount
 
-        acc_stock, created = AccountStock.objects.get_or_create(account=request.user.account, stock=stock, defaults={'average_buy_cost': 0, 'amount': 0})
+        acc_stock, created = AccountStock.objects.get_or_create(account=request.user.account, stock=stock,
+                                                                defaults={'average_buy_cost': 0, 'amount': 0})
         current_cost = acc_stock.average_buy_cost * acc_stock.amount
 
         total_cost = current_cost + buy_cost
@@ -42,8 +42,8 @@ def stock_buy(request, pk):
 
         acc_stock.amount = total_amount
         acc_stock.average_buy_cost = total_cost / total_amount
-
-        acc_currency, created = AccountCurrency.objects.get_or_create(account=request.user.account, currency=stock.currency, defaults={'amount': 0})
+        acc_currency, created = AccountCurrency.objects.get_or_create(account=request.user.account, currency=stock.currency,
+                                                                      defaults={'amount': 0})
 
         if acc_currency.amount < buy_cost:
             form.add_error(None, f'На счёте недостаточно средств в валюте {stock.currency.sign}')
@@ -59,7 +59,16 @@ def stock_buy(request, pk):
     }
 
     return render(request, 'stock.html', context)
-    
+
+
+@login_required
+def stock_detail(request, pk): artem
+
+
+@login_required
+def stock_buy(request, pk): artem
+
+
 @login_required
 def account(request):
     currencies = cache.get(f'currencies_{request.user.username}')
@@ -91,4 +100,3 @@ def account(request):
     }
 
     return render(request, template_name='account.html', context=context)
-

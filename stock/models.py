@@ -1,8 +1,23 @@
-from django.db import models
 from django.contrib.auth.models import User
-import random 
+from django.db import models
+import random
 
-
+# Create your models here.
+class Stock(models.Model):
+    name = models.CharField(max_length=40)
+    ticker = models.CharField(max_length=4, default="NULL")
+    description = models.TextField(null=True, blank=True)
+    currency = models.ForeignKey('Currency', null=True, on_delete=models.SET_NULL)
+    
+class Currency(models.Model):
+    name = models.CharField(max_length=40) 
+    ticker = models.CharField(max_length=4) 
+    sign = models.CharField(max_length=1) 
+    
+    def __str__(self): 
+        return self.sign
+        
+        
 class Stock(models.Model):
     name = models.CharField(max_length=40)
     ticker = models.CharField(max_length=4, default="NULL")
@@ -14,21 +29,15 @@ class Stock(models.Model):
         return random.randint(0, 3000)
 
     def __str__(self):
-        return f"{self.ticker}"    
-    
-class Currency(models.Model):
-    name = models.CharField(max_length=40)
-    ticker = models.CharField(max_length=4)
-    sign = models.CharField(max_length=1)
-    
-    def __str__(self):
-        return self.sign
-        
+        return f"{self.ticker}"
+
+
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.username
+
 
 class AccountCurrency(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -41,6 +50,7 @@ class AccountCurrency(models.Model):
     def __str__(self):
         return f'{self.account.user.username} {self.currency.sign}'
 
+
 class AccountStock(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
@@ -52,4 +62,3 @@ class AccountStock(models.Model):
 
     def __str__(self):
         return f'{self.account.user.username} {self.stock.ticker}'
-
